@@ -1,0 +1,12 @@
+[project]
+name = "event_cnn_minimal"
+version = "0.1.0"
+description = "A simple, pip installable wrapper over the event_cnn_minimal library"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project.urls]
+"Original Source" = "https://github.com/TimoStoff/event_cnn_minimal.git"
+"Original Paper" = "https://arxiv.org/abs/2003.09078"

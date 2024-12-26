@@ -1,11 +1,11 @@
 import torch
 import torch.nn.functional as F
+
 # local modules
-from PerceptualSimilarity import models
-from utils import loss
+from ..utils import loss
 
 
-class combined_perceptual_loss():
+class combined_perceptual_loss:
     def __init__(self, weight=1.0, use_gpu=True):
         """
         Flow wrapper for perceptual_loss
@@ -24,7 +24,7 @@ class combined_perceptual_loss():
         return dist * self.weight
 
 
-class warping_flow_loss():
+class warping_flow_loss:
     def __init__(self, weight=1.0, L0=1):
         assert L0 > 0
         self.loss = loss.warping_flow_loss
@@ -37,20 +37,23 @@ class warping_flow_loss():
         flow is from image0 to image1 (reversed when passed to
         warping_flow_loss function)
         """
-        loss = self.default_return if i < self.L0 else self.weight * self.loss(
-                self.image0, image1, -flow)
+        loss = (
+            self.default_return
+            if i < self.L0
+            else self.weight * self.loss(self.image0, image1, -flow)
+        )
         self.image0 = image1
         return loss
 
 
-class voxel_warp_flow_loss():
+class voxel_warp_flow_loss:
     def __init__(self, weight=1.0):
         self.loss = loss.voxel_warping_flow_loss
         self.weight = weight
 
     def __call__(self, voxel, displacement, output_images=False):
         """
-        Warp the voxel grid by the displacement map. Variance 
+        Warp the voxel grid by the displacement map. Variance
         of resulting image is loss
         """
         loss = self.loss(voxel, displacement, output_images)
@@ -61,7 +64,7 @@ class voxel_warp_flow_loss():
         return loss
 
 
-class flow_perceptual_loss():
+class flow_perceptual_loss:
     def __init__(self, weight=1.0, use_gpu=True):
         """
         Flow wrapper for perceptual_loss
@@ -79,7 +82,7 @@ class flow_perceptual_loss():
         return (dist_x + dist_y) / 2 * self.weight
 
 
-class flow_l1_loss():
+class flow_l1_loss:
     def __init__(self, weight=1.0):
         self.loss = F.l1_loss
         self.weight = weight
@@ -92,8 +95,8 @@ class flow_l1_loss():
 flow_loss = flow_l1_loss
 
 
-class perceptual_loss():
-    def __init__(self, weight=1.0, net='alex', use_gpu=True):
+class perceptual_loss:
+    def __init__(self, weight=1.0, net="alex", use_gpu=True):
         """
         Wrapper for PerceptualSimilarity.models.PerceptualLoss
         """
@@ -114,7 +117,7 @@ class perceptual_loss():
         return self.weight * dist.mean()
 
 
-class l2_loss():
+class l2_loss:
     def __init__(self, weight=1.0):
         self.loss = F.mse_loss
         self.weight = weight
@@ -123,7 +126,7 @@ class l2_loss():
         return self.weight * self.loss(pred, target)
 
 
-class temporal_consistency_loss():
+class temporal_consistency_loss:
     def __init__(self, weight=1.0, L0=1):
         assert L0 > 0
         self.loss = loss.temporal_consistency_loss
@@ -136,8 +139,14 @@ class temporal_consistency_loss():
         temporal_consistency_loss function)
         """
         if i >= self.L0:
-            loss = self.loss(self.image0, image1, self.processed0, processed1,
-                             -flow, output_images=output_images)
+            loss = self.loss(
+                self.image0,
+                image1,
+                self.processed0,
+                processed1,
+                -flow,
+                output_images=output_images,
+            )
             if output_images:
                 loss = (self.weight * loss[0], loss[1])
             else:
